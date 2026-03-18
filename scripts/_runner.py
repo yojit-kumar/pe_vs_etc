@@ -20,6 +20,11 @@ import time
 import numpy as np
 import multiprocessing as mp
 
+## FIX
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="ETC")
+##
+
 # ── Resolve src/ regardless of where the script is run from ──────────────────
 from pathlib import Path
 _ROOT = Path(__file__).resolve().parent.parent

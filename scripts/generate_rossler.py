@@ -40,6 +40,9 @@ import time
 import numpy as np
 from pathlib import Path
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="ETC")
+
 _ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_ROOT))
 
