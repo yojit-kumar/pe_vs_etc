@@ -192,20 +192,6 @@ whole run aborts immediately and prints the exit code.
 
 ---
 
-## Rössler wall-time note
-
-Rössler is significantly slower than the discrete maps at the same `L`
-because each sample requires ODE integration.  At `L = 10⁶`, `dt = 0.1`,
-one parameter value requires integrating `10⁵` time units of ODE — roughly
-15–30 s on a modern core.  A sweep of 500 parameter values on 16 cores
-therefore takes approximately:
-
-```
-500 values / 16 workers × 20 s/value ≈ 625 s  (~10 min) per L
-```
-
----
-
 ## Reproducing results from scratch
 
 ```bash

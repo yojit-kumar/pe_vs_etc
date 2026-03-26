@@ -183,7 +183,7 @@ Nagaraj et al. (2013). Continuous values are first symbolised into
 Recursive Pair Substitution (NSRPS) algorithm estimates the complexity of
 the resulting symbolic sequence.
 
-- Output: `NETC1D`
+- Output: ∈ `[0, 1]`
 - Key parameter: `bins` (number of symbols)
 - Coarser symbolisation (fewer bins) is more robust to noise but loses
   fine structure; finer symbolisation captures more detail but becomes

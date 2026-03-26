@@ -128,7 +128,7 @@ Generates small HDF5 files to verify the full pipeline end-to-end:
 ./scripts/run_all.sh --quick
 ```
 
-### Full production run
+### Full run
 
 ```bash
 ./scripts/run_all.sh --workers <N>
