@@ -71,31 +71,31 @@ else
     # ── Production settings ─────────────────────────────────────────────────
     LOGISTIC_ARGS="
         --a-min 3.5 --a-max 4.0
-        --n-param 50
-        --L 100 1000 10000 100000 1000000
+        --n-param 1000
+        --L 100 1000 10000 100000
         --transient 1000
-        --D 3 5 7
-        --bins 2 3 5
+        --D 3 4 5 6 7
+        --bins 2 4 6 8
         --noise 0.0 0.01 0.05 0.1
     "
     HENON_ARGS="
-        --a-min 0.8 --a-max 1.4
-        --n-param 50
+        --a-min 1.0 --a-max 1.4
+        --n-param 1000
         --b-fixed 0.3
-        --L 100 1000 10000 100000 1000000
-        --transient 1000
-        --D 3 5 7
-        --bins 2 3 5
+        --L 100 1000 10000 100000
+        --transient 5000
+        --D 3 4 5 6 7
+        --bins 2 4 6 8
         --noise 0.0 0.01 0.05 0.1
     "
     ROSSLER_ARGS="
         --c-min 2.0 --c-max 8.0
-        --n-param 500
+        --n-param 1000
         --a-fixed 0.2 --b-fixed 0.2
-        --dt 0.1 --transient-time 500.0
-        --L 100 1000 10000 100000 1000000
-        --D 3 5 7
-        --bins 2 3 5
+        --dt 1.0 --transient-time 3000.0
+        --L 100 1000 10000 100000
+        --D 3 4 5 6 7
+        --bins 2 4 6 8
         --noise 0.0 0.01 0.05 0.1
     "
 fi
