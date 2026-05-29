@@ -72,7 +72,7 @@ else
     LOGISTIC_ARGS="
         --a-min 3.5 --a-max 4.0
         --n-param 1000
-        --L 100 1000 10000 100000
+        --L 1000000
         --transient 1000
         --D 3 4 5 6 7
         --bins 2 4 6 8
@@ -82,7 +82,7 @@ else
         --a-min 1.0 --a-max 1.4
         --n-param 1000
         --b-fixed 0.3
-        --L 100 1000 10000 100000
+        --L 1000000
         --transient 5000
         --D 3 4 5 6 7
         --bins 2 4 6 8
@@ -93,7 +93,7 @@ else
         --n-param 1000
         --a-fixed 0.2 --b-fixed 0.2
         --dt 1.0 --transient-time 3000.0
-        --L 100 1000 10000 100000
+        --L 100000 1000000
         --D 3 4 5 6 7
         --bins 2 4 6 8
         --noise 0.0 0.01 0.05 0.1
