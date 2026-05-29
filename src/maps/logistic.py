@@ -13,12 +13,19 @@ def _logistic_step(x: float, a: float) -> float:
 
 @njit
 def _trajectory(a: float, L: int, transient: int, x0: float) -> np.ndarray:
-    n = L + transient
-    series = np.zeros(n)
-    series[0] = x0
-    for i in range(1, n):
-        series[i] = _logistic_step(series[i - 1], a)
-    return series[transient:]
+    x = x0
+    
+    # 1. Burn-in without array allocation
+    for _ in range(transient):
+        x = _logistic_step(x, a)
+
+    # 2. Allocate exact needed memory and run production
+    series = np.zeros(L)
+    for i in range(L):
+        x = _logistic_step(x, a)
+        series[i] = x
+        
+    return series
 
 
 def simulate(a: float, L: int, transient: int, seed: int = 42) -> np.ndarray:

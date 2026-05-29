@@ -47,13 +47,11 @@ def _mle(a: float, b: float, L: int, transient: int,
 
     acc = 0.0
     for _ in range(L):
+        # Store x_old before taking the step to safely compute the Jacobian
+        x_old = x
         x, y = _henon_step(x, y, a, b)
 
-        # Apply Jacobian:  J * [dx, dy]^T
-        # J = [[-2a*x_old,  1],   but x has already been updated above.
-        #      [b,           0]]
-        # We need x_old.  Recover: x_old = y_new / b  (from y_{n+1} = b*x_n)
-        x_old = y / b if b != 0.0 else 0.0
+        # Apply Jacobian: J * [dx, dy]^T evaluated at x_old
         new_dx = -2.0 * a * x_old * dx + dy
         new_dy = b * dx
 
