@@ -14,12 +14,10 @@ def _rossler_var_deriv(x: float, y: float, z: float,
                        dx: float, dy: float, dz: float, 
                        a: float, b: float, c: float):
     """Augmented 6D vector field: Rössler + Variational equations."""
-    # Base field
     fx = -y - z
     fy = x + a * y
     fz = b + z * (x - c)
     
-    # Jacobian * [dx, dy, dz]^T
     fdx = -dy - dz
     fdy = dx + a * dy
     fdz = z * dx + (x - c) * dz
@@ -31,7 +29,6 @@ def _rk4_step(x: float, y: float, z: float,
               a: float, b: float, c: float, dt: float):
     """Single fixed-step RK4 integration for the base system."""
     k1x, k1y, k1z = _rossler_deriv(x, y, z, a, b, c)
-    
     k2x, k2y, k2z = _rossler_deriv(x + 0.5*dt*k1x, y + 0.5*dt*k1y, z + 0.5*dt*k1z, a, b, c)
     k3x, k3y, k3z = _rossler_deriv(x + 0.5*dt*k2x, y + 0.5*dt*k2y, z + 0.5*dt*k2z, a, b, c)
     k4x, k4y, k4z = _rossler_deriv(x + dt*k3x, y + dt*k3y, z + dt*k3z, a, b, c)
@@ -77,19 +74,29 @@ def _rk4_var_step(x: float, y: float, z: float,
 
 @njit
 def _trajectory(a: float, b: float, c: float, 
-                L: int, transient_steps: int, dt: float,
-                x0: float, y0: float, z0: float) -> np.ndarray:
+                L: int, transient_time: float, dt_sample: float,
+                x0: float, y0: float, z0: float, dt_int: float = 0.01) -> np.ndarray:
+    
+    # Calculate how many internal micro-steps are needed per recorded observation
+    steps_per_sample = max(1, int(np.round(dt_sample / dt_int)))
+    actual_dt_int = dt_sample / steps_per_sample 
+    
+    transient_samples = int(transient_time / dt_sample)
+    transient_steps = transient_samples * steps_per_sample
+    
     x, y, z = x0, y0, z0
     
-    # 1. Burn-in (no array allocation)
+    # 1. Burn-in
     for _ in range(transient_steps):
-        x, y, z = _rk4_step(x, y, z, a, b, c, dt)
+        x, y, z = _rk4_step(x, y, z, a, b, c, actual_dt_int)
 
     # 2. Production run
     series = np.zeros(L)
     for i in range(L):
-        x, y, z = _rk4_step(x, y, z, a, b, c, dt)
-        series[i] = x  # Retain only the x-component observation
+        # Evolve system forward by dt_sample using multiple tiny steps
+        for _ in range(steps_per_sample):
+            x, y, z = _rk4_step(x, y, z, a, b, c, actual_dt_int)
+        series[i] = x 
         
     return series
 
@@ -100,44 +107,49 @@ def simulate(a: float, b: float, c: float,
              seed: int = 42) -> np.ndarray:
     rng = np.random.default_rng(seed)
     x0, y0, z0 = rng.uniform(-1.0, 1.0, 3)
-    transient_steps = int(transient_time / dt)
     
-    return _trajectory(a, b, c, L, transient_steps, dt, x0, y0, z0)
+    return _trajectory(a, b, c, L, transient_time, dt, x0, y0, z0)
 
 
 # ── MLE ───────────────────────────────────────────────────────────────────────
 
 @njit
 def _mle(a: float, b: float, c: float, 
-         L: int, transient_steps: int, dt: float, renorm_interval: int,
+         L: int, transient_time: float, dt_sample: float, renorm_interval: int,
          x0: float, y0: float, z0: float, 
-         dx0: float, dy0: float, dz0: float) -> float:
+         dx0: float, dy0: float, dz0: float, dt_int: float = 0.01) -> float:
+         
+    steps_per_sample = max(1, int(np.round(dt_sample / dt_int)))
+    actual_dt_int = dt_sample / steps_per_sample 
+    
+    transient_samples = int(transient_time / dt_sample)
+    transient_steps = transient_samples * steps_per_sample
+    
     x, y, z = x0, y0, z0
     
-    # 1. Burn-in to settle on attractor
+    # Burn-in
     for _ in range(transient_steps):
-        x, y, z = _rk4_step(x, y, z, a, b, c, dt)
+        x, y, z = _rk4_step(x, y, z, a, b, c, actual_dt_int)
 
-    # 2. Setup tangent vector
     dx, dy, dz = dx0, dy0, dz0
     norm = np.sqrt(dx*dx + dy*dy + dz*dz)
     dx, dy, dz = dx / norm, dy / norm, dz / norm
 
     acc = 0.0
     
-    # 3. Continuous Benettin accumulation
     for i in range(L):
-        x, y, z, dx, dy, dz = _rk4_var_step(x, y, z, dx, dy, dz, a, b, c, dt)
+        for _ in range(steps_per_sample):
+            x, y, z, dx, dy, dz = _rk4_var_step(x, y, z, dx, dy, dz, a, b, c, actual_dt_int)
         
-        # Renormalize periodically
+        # Renormalize periodically (based on recorded sample count, not micro-steps)
         if (i + 1) % renorm_interval == 0:
             norm = np.sqrt(dx*dx + dy*dy + dz*dz)
-            if norm <= 0.0:
+            if norm <= 0.0 or np.isnan(norm):
                 return -np.inf
             acc += np.log(norm)
             dx, dy, dz = dx / norm, dy / norm, dz / norm
 
-    total_time = L * dt
+    total_time = L * dt_sample
     return acc / total_time
 
 def lyapunov_mle(a: float, b: float, c: float,
@@ -150,7 +162,5 @@ def lyapunov_mle(a: float, b: float, c: float,
     x0, y0, z0 = rng.uniform(-1.0, 1.0, 3)
     dx0, dy0, dz0 = rng.standard_normal(3)
     
-    transient_steps = int(transient_time / dt)
-    
-    return _mle(a, b, c, L, transient_steps, dt, renorm_interval,
+    return _mle(a, b, c, L, transient_time, dt, renorm_interval,
                 x0, y0, z0, dx0, dy0, dz0)
