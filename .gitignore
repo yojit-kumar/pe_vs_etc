@@ -1,0 +1,63 @@
+# ── Data files (too large for git — regenerate with scripts/run_all.sh) ──────
+data/
+*.h5
+*.hdf5
+
+# ── Generated figures (binary — kept out of git to avoid bloat) ──────────────
+figures/**/*.png
+figures/**/*.pdf
+figures/**/*.svg
+
+# Keep the figures/ subdirectory structure so git tracks the layout
+!figures/sanity/.gitkeep
+!figures/logistic/.gitkeep
+!figures/henon/.gitkeep
+!figures/rossler/.gitkeep
+
+# ── Logs (generated at runtime alongside data files) ─────────────────────────
+*.log
+logs/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+# Keep outputs stripped by default; commit clean notebooks
+# (nbstripout is recommended — see README)
+
+# ── Numba cache (JIT artefacts, rebuilt automatically) ───────────────────────
+__numba_cache__/
+*.nbi
+*.nbc
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+.conda/
+
+# ── OS artefacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor / IDE ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Profiling artefacts ───────────────────────────────────────────────────────
+*.prof
